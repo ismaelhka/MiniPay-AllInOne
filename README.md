@@ -1,6 +1,5 @@
 # MiniPay-AllInOne
-MiniPay-AllInOne Descripción: MiniPay-AllInOne es una plataforma de pagos todo-en-uno desarrollada en un solo archivo Node.js, diseñada para administradores que desean recibir pagos directamente de clientes sin depender de terceros como PayPal.
-// mini-pay-modern.js
+// mini-pay-dashboard.js
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -107,7 +106,7 @@ app.post('/api/create-payment', auth, async (req,res)=>{
     }catch(err){res.status(500).send({error:err.message});}
 });
 
-// --- Depósito bancario manual ---
+// --- Depósito manual ---
 app.post('/api/deposit', auth, async (req,res)=>{
     const {amount,note} = req.body;
     await pool.query(
@@ -143,7 +142,7 @@ app.post('/api/withdraw', auth, async (req,res)=>{
     res.send({success:true,newBalance});
 });
 
-// --- Interfaz web moderna ---
+// --- Servir interfaz web limpia y moderna ---
 app.get('/', (req,res)=>{
     res.send(`
 <!DOCTYPE html>
@@ -155,7 +154,7 @@ app.get('/', (req,res)=>{
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f5f7fa; margin:0; padding:0;}
 header { background:#4a90e2; color:white; padding:1rem; text-align:center;}
 .container { max-width:900px; margin:20px auto; padding:20px; background:white; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1);}
-input, button { padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc;}
+input, button { padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; width:100%;}
 button { cursor:pointer; background:#4a90e2; color:white; border:none;}
 button:hover { background:#357ab8;}
 .card { background:#e9f0ff; padding:15px; border-radius:8px; margin-bottom:15px;}
@@ -171,9 +170,9 @@ button:hover { background:#357ab8;}
 <body>
 <header><h1>MiniPay Dashboard</h1></header>
 <div class="container">
-<h2>Admin Login</h2>
-<input id="email" placeholder="Email"/><br/>
-<input id="pass" type="password" placeholder="Contraseña"/><br/>
+<h2>Iniciar Sesión</h2>
+<input id="email" placeholder="Email"/>
+<input id="pass" type="password" placeholder="Contraseña"/>
 <button onclick="login()">Login</button>
 <hr/>
 <div id="panel" style="display:none">
@@ -199,49 +198,4 @@ button:hover { background:#357ab8;}
 let token='';
 const mp = new MercadoPago('TEST-ACCESS-TOKEN',{locale:'es-EC'});
 function login(){
-    fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('pass').value})})
-    .then(r=>r.json()).then(d=>{if(d.token){token=d.token; document.getElementById('panel').style.display='block'; alert('Login correcto');}else{alert('Error login')}})
-}
-function loadTransactions(){
-    fetch('/api/transactions',{headers:{Authorization:'Bearer '+token}})
-    .then(r=>r.json()).then(d=>{
-        document.getElementById('balance').innerText=(d.balance/100).toFixed(2);
-        const txs = d.transactions.map(t=>{
-            let cls = t.status==='pending'?'tx-pending': t.status==='approved'?'tx-approved':'tx-failed';
-            return '<li class="'+cls+'">'+t.type+': '+(t.amount_cents/100)+' USD - '+t.status+'</li>';
-        }).join('');
-        document.getElementById('txs').innerHTML=txs;
-    })
-}
-function createPayment(){
-    const a=parseFloat(document.getElementById('payAmount').value);
-    const desc=document.getElementById('payDesc').value;
-    fetch('/api/create-payment',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({amount:a,description:desc})})
-    .then(r=>r.json()).then(d=>{
-        window.open(d.init_point,'_blank');
-        loadTransactions();
-    })
-}
-function deposit(){
-    const a=parseFloat(document.getElementById('depAmount').value);
-    const note=document.getElementById('depNote').value;
-    fetch('/api/deposit',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({amount:a,note})})
-    .then(r=>r.json()).then(d=>{alert('Depósito agregado'); loadTransactions();})
-}
-function withdraw(){
-    const a=parseFloat(document.getElementById('withAmount').value);
-    const m=document.getElementById('withMethod').value;
-    const d=document.getElementById('withDetails').value;
-    fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({amount:a,method:m,details:d})})
-    .then(r=>r.json()).then(d=>{alert('Retiro solicitado'); loadTransactions();})
-}
-</script>
-</body>
-</html>
-    `);
-});
-
-// --- Inicializar DB y admin ---
-initDB().then(initAdmin);
-
-app.listen(3000,()=>console.log('MiniPay moderno corriendo en http://localhost:3000'));
+    fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('
